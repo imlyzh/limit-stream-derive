@@ -11,6 +11,7 @@ proc-macro = true
 proc-macro2 = "1.0.69"
 quote = "1.0.33"
 syn = "2.0.38"
+limit-stream = { git="https://github.com/limitstream/limit-stream", version="0.1.0" }
 
 [dev-dependencies]
 limit-stream-runtime = { git="https://github.com/limitstream/limit-stream-runtime", version="0.1.0" }

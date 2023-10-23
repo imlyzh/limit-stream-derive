@@ -1,6 +1,38 @@
+use std::{fs::File, io::Read};
+
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, DeriveInput};
+use limit_stream::codegen::{idl2rust, rust::Rust};
+
+#[proc_macro]
+pub fn include_idl(ident: TokenStream) -> TokenStream {
+    let ident = ident.to_string();
+    println!("{}", ident);
+    let mut f = File::open(ident).unwrap();
+    let mut src = String::new();
+    f.read_to_string(&mut src).unwrap();
+    let code = idl2rust(&src, &mut Rust {
+        tab_size: 0,
+        indent: 0,
+        enum_id: Default::default(),
+        codegen_regester: Default::default(),
+    });
+    code.parse().unwrap()
+}
+
+#[proc_macro]
+pub fn inline_idl(ident: TokenStream) -> TokenStream {
+    let src = ident.to_string();
+    println!("{}", src);
+    let code = idl2rust(&src, &mut Rust {
+        tab_size: 0,
+        indent: 0,
+        enum_id: Default::default(),
+        codegen_regester: Default::default(),
+    });
+    code.parse().unwrap()
+}
 
 #[proc_macro_derive(RmpSer)]
 pub fn derive_ser(item: TokenStream) -> TokenStream {
