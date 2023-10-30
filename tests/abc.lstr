@@ -1,0 +1,16 @@
+struct User {
+    name: string = 0,
+    age: uint = 1,
+    description: string = 2,
+}
+enum SB {
+    is_sb(User) = 1,
+    is_not_sb(User) = 0,
+}
+channel sum =
+    recv int ->
+    offer
+        | sum
+        | recv Done ->
+          send int ->
+          end

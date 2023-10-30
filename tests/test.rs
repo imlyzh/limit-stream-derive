@@ -1,9 +1,9 @@
-use limit_stream_derive::{RmpDeSer, RmpSer};
+use limit_stream_derive::{include_idl, inline_idl, RmpDeSer, RmpSer};
 use limit_stream_runtime::builtin_type::Uint;
-use limit_stream_runtime::{Deser, Ser};
+// use limit_stream_runtime::{Deser, Ser};
 
 #[derive(RmpSer, RmpDeSer)]
-pub struct User {
+pub struct NormalUser {
     pub name: String,
     pub age: Uint,
     pub description: String,
@@ -21,3 +21,5 @@ fn test() {
     // let src: TokenStream = "".parse().unwrap();
     // derive_ser(src);
 }
+
+include_idl!("./tests/abc.lstr");

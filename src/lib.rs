@@ -1,36 +1,50 @@
-use std::{fs::File, io::Read};
+use std::{fs::File, io::Read, path::PathBuf};
 
-use proc_macro::TokenStream;
+use proc_macro::{LexError, TokenStream};
 use quote::quote;
 use syn::{parse_macro_input, DeriveInput};
+
 use limit_stream::codegen::{idl2rust, rust::Rust};
 
 #[proc_macro]
-pub fn include_idl(ident: TokenStream) -> TokenStream {
-    let ident = ident.to_string();
-    println!("{}", ident);
-    let mut f = File::open(ident).unwrap();
+pub fn include_idl(input: TokenStream) -> TokenStream {
+    let path = match syn::parse::<syn::LitStr>(input) {
+        Ok(path) => {
+            let path = path.value();
+            std::env::var("CARGO_MANIFEST_DIR")
+                .map(|p| PathBuf::from(p).join(path))
+                .expect("CARGO_MANIFEST_DIR doesn't exist")
+        }
+        Err(e) => return e.to_compile_error().into(),
+    };
+    let mut f = File::open(path).unwrap();
     let mut src = String::new();
     f.read_to_string(&mut src).unwrap();
-    let code = idl2rust(&src, &mut Rust {
-        tab_size: 0,
-        indent: 0,
-        enum_id: Default::default(),
-        codegen_regester: Default::default(),
-    });
+    let code = idl2rust(
+        &src,
+        &mut Rust {
+            tab_size: 0,
+            indent: 0,
+            enum_id: Default::default(),
+            codegen_regester: Default::default(),
+        },
+    );
     code.parse().unwrap()
 }
 
 #[proc_macro]
-pub fn inline_idl(ident: TokenStream) -> TokenStream {
-    let src = ident.to_string();
+pub fn inline_idl(input: TokenStream) -> TokenStream {
+    let src = input.to_string();
     println!("{}", src);
-    let code = idl2rust(&src, &mut Rust {
-        tab_size: 0,
-        indent: 0,
-        enum_id: Default::default(),
-        codegen_regester: Default::default(),
-    });
+    let code = idl2rust(
+        &src,
+        &mut Rust {
+            tab_size: 0,
+            indent: 0,
+            enum_id: Default::default(),
+            codegen_regester: Default::default(),
+        },
+    );
     code.parse().unwrap()
 }
 
